@@ -6,13 +6,11 @@ import (
 	"time"
 )
 
-
-
 var exports = map[string]lua.LGFunction{
 	"sleep": func(state *lua.LState) int {
-		var d  time.Duration
+		var d time.Duration
 		arg1 := state.Get(1).String()
-		i,err := strconv.ParseInt(arg1,10,64)
+		i, err := strconv.ParseInt(arg1, 10, 64)
 		if err != nil {
 			return 0
 		}
@@ -23,9 +21,11 @@ var exports = map[string]lua.LGFunction{
 	},
 }
 
-func Load (L *lua.LState)int{
+func Load(L *lua.LState) int {
 	tb := L.NewTable()
-	L.SetFuncs(tb,exports)
+	tb.RawSetString("second", lua.LNumber(1000))
+	tb.RawSetString("minute", lua.LNumber(1000*60))
+	L.SetFuncs(tb, exports)
 
 	L.Push(tb)
 	return 1

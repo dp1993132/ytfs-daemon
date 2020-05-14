@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/natefinch/lumberjack"
 	"log"
 	"os"
@@ -29,14 +30,33 @@ func main() {
 		log.SetOutput(FileLogger)
 		log.Println("守护进程已启动")
 		for {
-			cmd := exec.Command(os.Args[0])
-			cmd.Stdout = log.Writer()
-			cmd.Stderr = log.Writer()
-			cmd.Env = os.Environ()
-			cmd.Run()
+			boot()
 		}
 		log.Println("守护进程退出")
 	} else {
 		VM.Run("update.lua", "boot.lua")
 	}
+}
+
+func boot() {
+	log.Println("主脚本启动")
+	defer func() {
+		log.Println("主脚本退出")
+	}()
+
+	cmd := exec.Command(os.Args[0])
+	cmd.Stdout = log.Writer()
+	cmd.Stderr = log.Writer()
+	cmd.Env = os.Environ()
+
+	fl, err := os.OpenFile(".pid", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+
+	cmd.Start()
+	if err != nil {
+		log.Println(err.Error())
+	} else {
+		fl.WriteString(fmt.Sprintf("%d", cmd.Process.Pid))
+		fl.Close()
+	}
+	cmd.Wait()
 }

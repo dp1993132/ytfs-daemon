@@ -5,7 +5,9 @@ import (
 	"log"
 	"sync"
 	"yottachain/ytfs-daemon/luamod/cmd"
+	"yottachain/ytfs-daemon/luamod/config"
 	lmhttp "yottachain/ytfs-daemon/luamod/http"
+	lmos "yottachain/ytfs-daemon/luamod/process"
 	tm "yottachain/ytfs-daemon/luamod/time"
 )
 
@@ -29,6 +31,8 @@ func getVM() interface{} {
 	ls.PreloadModule("cmd", cmd.Load)
 	ls.PreloadModule("time", tm.Load)
 	ls.PreloadModule("http", lmhttp.Load)
+	ls.PreloadModule("process", lmos.Load)
+	ls.PreloadModule("config", config.Load)
 
 	load(ls)
 
