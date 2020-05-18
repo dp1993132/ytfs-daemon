@@ -10,7 +10,8 @@ function init()
         print(err)
 
         print("下载最新ytfs-node...")
-        util.download_ytfs_node()
+        remote_version,download_url = util.get_remote_version_info()
+        util.download_ytfs_node(remote_version,download_url)
         print("下载完成")
     else
         print("当前版本:",version)

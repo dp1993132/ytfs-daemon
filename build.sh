@@ -7,10 +7,12 @@ GOOS=darwin GOARCH=amd64 go build -o ${out_file_name}-darwin ./main.go
 echo build windows
 GOOS=windows GOARCH=amd64 go build -o ${out_file_name}-windows ./main.go
 
-rm -rf out
+rm -rf out*
 
 mkdir out
 
 mv ${out_file_name}* ./out
 
 cp *lua ./out
+
+tar -czvf out.tar.gz ./out
