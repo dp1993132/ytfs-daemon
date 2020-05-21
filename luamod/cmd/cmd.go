@@ -5,7 +5,17 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 )
+
+type TaskManage struct {
+	pool map[string]*exec.Cmd
+	sync.Mutex
+}
+
+var defaultTM = &TaskManage{
+	pool: make(map[string]*exec.Cmd),
+}
 
 func parseCmd(L *lua.LState) *exec.Cmd {
 	cmdstr := L.Get(1).String()
@@ -26,6 +36,42 @@ func Command(L *lua.LState) int {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	cmdTb := makeCmdTab(cmd, L)
+
+	L.Push(cmdTb)
+
+	return 1
+}
+
+func ExecCmd(L *lua.LState) int {
+	cmd := parseCmd(L)
+
+	buf, err := cmd.Output()
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	L.Push(lua.LString(buf))
+	L.Push(lua.LNil)
+	return 2
+}
+
+func AddTask(L *lua.LState) int {
+	defaultTM.Lock()
+	defer defaultTM.Unlock()
+
+	cmd := parseCmd(L)
+
+	name := L.Get(2).String()
+
+	defaultTM.pool[name] = cmd
+
+	return 0
+}
+
+func makeCmdTab(cmd *exec.Cmd, L *lua.LState) *lua.LTable {
 	cmdTb := L.NewTable()
 
 	L.SetFuncs(cmdTb, map[string]lua.LGFunction{
@@ -82,24 +128,7 @@ func Command(L *lua.LState) int {
 		},
 	})
 
-	L.Push(cmdTb)
-
-	return 1
-}
-
-func ExecCmd(L *lua.LState) int {
-	cmd := parseCmd(L)
-
-	buf, err := cmd.Output()
-	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	L.Push(lua.LString(buf))
-	L.Push(lua.LNil)
-	return 2
+	return cmdTb
 }
 
 var exports = map[string]lua.LGFunction{

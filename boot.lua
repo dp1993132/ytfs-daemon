@@ -21,5 +21,6 @@ end
 init()
 
 print("启动ytfs-node")
+mv("ytfs-node.new","ytfs-node")
 cmd.command("./ytfs-node daemon").run()
 print("ytfs-node 运行结束")

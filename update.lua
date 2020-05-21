@@ -10,7 +10,7 @@ while (true) do
     if remote_version > util.get_current_version() then
         err = util.download_ytfs_node(remote_version,download_url)
         if err == nil then
-            process.killSelf()
+            process.pkill("ytfs-node")
             print("更新完成")
         else
             print("更新失败",err)

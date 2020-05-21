@@ -27,6 +27,7 @@ var exports = map[string]lua.LGFunction{
 		}
 
 		fl, err := os.OpenFile(name, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0744)
+		defer fl.Close()
 		if err != nil {
 			state.Push(lua.LString(err.Error()))
 			return 1

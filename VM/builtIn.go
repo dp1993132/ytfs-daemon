@@ -46,10 +46,24 @@ func md5sum(L *lua.LState) int {
 	return 1
 }
 
+func mv(L *lua.LState) int {
+	oname := L.Get(1).String()
+	nname := L.Get(2).String()
+
+	err := os.Rename(oname, nname)
+
+	if err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
+	}
+	return 0
+}
+
 func load(L *lua.LState) int {
 	// 运行新的脚本
 	L.SetGlobal("run", L.NewFunction(run))
 	L.SetGlobal("md5sum", L.NewFunction(md5sum))
+	L.SetGlobal("mv", L.NewFunction(mv))
 	// 常量---------------------------------
 	L.SetGlobal("L_OS", lua.LString(runtime.GOOS))
 	L.SetGlobal("L_ARCH", lua.LString(runtime.GOARCH))

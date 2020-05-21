@@ -6,7 +6,7 @@ module = {}
 local current_version = 0
 
 function module.download_ytfs_node(remote_version, download_url)
-    err = http.download(download_url,"ytfs-node")
+    err = http.download(download_url,"ytfs-node.new")
     if err == nil then
         current_version = remote_version
     end
