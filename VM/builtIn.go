@@ -6,6 +6,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	"io"
 	"os"
+	"os/user"
 	"runtime"
 )
 
@@ -59,11 +60,35 @@ func mv(L *lua.LState) int {
 	return 0
 }
 
+// GetCurrentUserHome 获取当前用户主目录
+func GetCurrentUserHome() string {
+	var userDir string
+	if u, err := user.Current(); err == nil {
+		userDir = u.HomeDir
+	}
+	return userDir
+}
+
+// GetYTFSPath 获取YTFS文件存放路径
+//
+// 如果存在环境变量ytfs_path则使用环境变量ytfs_path
+func GetYTFSPath() string {
+	ps, ok := os.LookupEnv("ytfs_path")
+	if ok {
+		return ps
+	}
+	return GetCurrentUserHome() + "/YTFS"
+}
+
 func load(L *lua.LState) int {
 	// 运行新的脚本
 	L.SetGlobal("run", L.NewFunction(run))
 	L.SetGlobal("md5sum", L.NewFunction(md5sum))
 	L.SetGlobal("mv", L.NewFunction(mv))
+	L.SetGlobal("YTFS_PATH", L.NewFunction(func(state *lua.LState) int {
+		state.Push(lua.LString(GetYTFSPath()))
+		return 1
+	}))
 	// 常量---------------------------------
 	L.SetGlobal("L_OS", lua.LString(runtime.GOOS))
 	L.SetGlobal("L_ARCH", lua.LString(runtime.GOARCH))
